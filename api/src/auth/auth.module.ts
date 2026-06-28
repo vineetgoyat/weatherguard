@@ -12,9 +12,14 @@ import { UsersModule } from '../users/users.module';
   imports: [
     UsersModule,
     PassportModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET || 'secret',
-      signOptions: { expiresIn: '7d' },
+    JwtModule.registerAsync({
+      useFactory: () => {
+        console.log('JWT Secret being used:', process.env.JWT_SECRET);
+        return {
+          secret: process.env.JWT_SECRET || 'fallback-secret',
+          signOptions: { expiresIn: '7d' },
+        };
+      },
     }),
   ],
   providers: [AuthService, GoogleStrategy, GithubStrategy, JwtStrategy],

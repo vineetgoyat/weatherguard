@@ -24,9 +24,14 @@ exports.AuthModule = AuthModule = __decorate([
         imports: [
             users_module_1.UsersModule,
             passport_1.PassportModule,
-            jwt_1.JwtModule.register({
-                secret: process.env.JWT_SECRET || 'secret',
-                signOptions: { expiresIn: '7d' },
+            jwt_1.JwtModule.registerAsync({
+                useFactory: () => {
+                    console.log('JWT Secret being used:', process.env.JWT_SECRET);
+                    return {
+                        secret: process.env.JWT_SECRET || 'fallback-secret',
+                        signOptions: { expiresIn: '7d' },
+                    };
+                },
             }),
         ],
         providers: [auth_service_1.AuthService, google_strategy_1.GoogleStrategy, github_strategy_1.GithubStrategy, jwt_strategy_1.JwtStrategy],
