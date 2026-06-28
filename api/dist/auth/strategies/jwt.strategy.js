@@ -18,10 +18,11 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
-            secretOrKey: process.env.JWT_SECRET,
+            secretOrKey: process.env.JWT_SECRET || 'vineet-weatherguard-secret-key-2026-xyz789abc',
         });
     }
     async validate(payload) {
+        console.log('JWT validated, payload:', payload);
         return { id: payload.sub, email: payload.email, isAdmin: payload.isAdmin };
     }
 };
