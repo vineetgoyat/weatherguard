@@ -1,17 +1,24 @@
 import { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function AuthCallback() {
-  const [params] = useSearchParams();
   const { login } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = params.get('token');
+    const token = new URLSearchParams(window.location.search).get('token');
+    console.log('Token from URL:', token);
+    
     if (token) {
-      login(token).then(() => navigate('/dashboard', { replace: true }));
+      login(token).then(() => {
+        navigate('/dashboard', { replace: true });
+      }).catch((err) => {
+        console.error('Login error:', err);
+        navigate('/', { replace: true });
+      });
     } else {
+      console.error('No token in URL');
       navigate('/', { replace: true });
     }
   }, []);
