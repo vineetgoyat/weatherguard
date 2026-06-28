@@ -24,8 +24,7 @@ export class TelegramService implements OnModuleInit {
         await this.usersService.updateTelegramChatId(userId, chatId);
         await this.bot.sendMessage(
           chatId,
-          `✅ *WeatherGuard Linked!*\n\nHi ${msg.from.first_name}! Your Telegram is now connected.\n\nYou'll receive weather alerts here once an admin approves your access.`,
-          { parse_mode: 'Markdown' },
+          `✅ WeatherGuard Linked!\n\nYour Telegram is now connected. You will receive weather alerts once your access is approved.`,
         );
       } catch (e) {
         this.logger.error('Error linking Telegram:', e);
@@ -35,8 +34,7 @@ export class TelegramService implements OnModuleInit {
     this.bot.onText(/\/start$/, async (msg) => {
       await this.bot.sendMessage(
         msg.chat.id,
-        `👋 Welcome to *WeatherGuard Bot*!\n\nSign up on the web app and use your unique link to connect Telegram.`,
-        { parse_mode: 'Markdown' },
+        `👋 Welcome to WeatherGuard Bot!\n\nSign up on the web app and use your unique link to connect Telegram.`,
       );
     });
 
@@ -47,8 +45,7 @@ export class TelegramService implements OnModuleInit {
     if (!this.bot) return;
     await this.bot.sendMessage(
       chatId,
-      `🎉 *Access Approved!*\n\nHey ${userName}, your WeatherGuard access has been approved!\n\n🌦 You'll now receive automated weather alerts twice daily (8 AM & 6 PM).`,
-      { parse_mode: 'Markdown' },
+      `🎉 Access Approved!\n\nYour WeatherGuard access has been approved! You will now receive automated weather alerts twice daily at 8 AM and 6 PM.`,
     );
   }
 
@@ -56,13 +53,13 @@ export class TelegramService implements OnModuleInit {
     if (!this.bot) return;
     const emoji = this.getWeatherEmoji(weather.description);
     const message =
-      `${emoji} *Weather Alert — ${weather.city}*\n\n` +
-      `🌡 Temperature: *${weather.temp}°C* (feels like ${weather.feelsLike}°C)\n` +
-      `☁️ Condition: *${weather.description}*\n` +
-      `💧 Humidity: ${weather.humidity}%\n` +
-      `💨 Wind: ${weather.windSpeed} m/s\n\n` +
-      `_Updated: ${new Date().toLocaleString()}_`;
-    await this.bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+      `${emoji} Weather Alert - ${weather.city}\n\n` +
+      `Temperature: ${weather.temp}°C (feels like ${weather.feelsLike}°C)\n` +
+      `Condition: ${weather.description}\n` +
+      `Humidity: ${weather.humidity}%\n` +
+      `Wind: ${weather.windSpeed} m/s\n\n` +
+      `Updated: ${new Date().toLocaleString()}`;
+    await this.bot.sendMessage(chatId, message);
   }
 
   private getWeatherEmoji(description: string): string {
