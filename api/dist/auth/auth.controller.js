@@ -23,12 +23,14 @@ let AuthController = class AuthController {
     googleAuth() { }
     async googleCallback(req, res) {
         const { access_token } = await this.authService.generateToken(req.user);
-        res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${access_token}`);
+        console.log('✅ Google login success, redirecting with token...');
+        return res.redirect(`http://localhost:5173/auth/callback?token=${access_token}`);
     }
     githubAuth() { }
     async githubCallback(req, res) {
         const { access_token } = await this.authService.generateToken(req.user);
-        res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${access_token}`);
+        console.log('✅ GitHub login success, redirecting with token...');
+        return res.redirect(`http://localhost:5173/auth/callback?token=${access_token}`);
     }
 };
 exports.AuthController = AuthController;

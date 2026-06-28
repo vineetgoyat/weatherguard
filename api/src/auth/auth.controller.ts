@@ -14,7 +14,8 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleCallback(@Req() req, @Res() res) {
     const { access_token } = await this.authService.generateToken(req.user);
-    res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${access_token}`);
+    console.log('✅ Google login success, redirecting with token...');
+    return res.redirect(`http://localhost:5173/auth/callback?token=${access_token}`);
   }
 
   @Get('github')
@@ -25,6 +26,7 @@ export class AuthController {
   @UseGuards(AuthGuard('github'))
   async githubCallback(@Req() req, @Res() res) {
     const { access_token } = await this.authService.generateToken(req.user);
-    res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${access_token}`);
+    console.log('✅ GitHub login success, redirecting with token...');
+    return res.redirect(`http://localhost:5173/auth/callback?token=${access_token}`);
   }
 }
