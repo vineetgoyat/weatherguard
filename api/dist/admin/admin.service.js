@@ -25,18 +25,18 @@ let AdminService = class AdminService {
         this.telegramService = telegramService;
         this.weatherService = weatherService;
     }
-    getAllUsers() {
-        return this.userModel.find().sort({ createdAt: -1 }).lean();
+    async getPendingUsers() {
+        return this.userModel.find({ status: 'pending' }).exec();
     }
-    getPendingUsers() {
-        return this.userModel.find({ status: 'pending' }).sort({ createdAt: -1 }).lean();
+    async getAllUsers() {
+        return this.userModel.find().exec();
     }
     async approveUser(id) {
         const user = await this.userModel.findByIdAndUpdate(id, { status: 'approved' }, { new: true });
         if (!user)
             throw new common_1.NotFoundException('User not found');
         if (user.telegramChatId) {
-            await this.telegramService.sendMessage(user.telegramChatId, '🎉 *Access Approved!*\n\nYou have been approved for WeatherGuard. You will now receive weather alerts at 8 AM and 6 PM daily.');
+            await this.telegramService.sendApprovalNotification(user.telegramChatId, user.name);
         }
         return user;
     }
@@ -44,28 +44,19 @@ let AdminService = class AdminService {
         const user = await this.userModel.findByIdAndUpdate(id, { status: 'rejected' }, { new: true });
         if (!user)
             throw new common_1.NotFoundException('User not found');
-        if (user.telegramChatId) {
-            await this.telegramService.sendMessage(user.telegramChatId, '❌ *Access Rejected*\n\nUnfortunately your WeatherGuard access request was not approved. Please contact the admin for more information.');
-        }
         return user;
     }
     async sendAlertToUser(id) {
         const user = await this.userModel.findById(id);
         if (!user)
             throw new common_1.NotFoundException('User not found');
+        if (user.status !== 'approved')
+            throw new Error('User is not approved');
         if (!user.telegramChatId)
-            throw new common_1.NotFoundException('User has no Telegram linked');
-        if (!user.city)
-            throw new common_1.NotFoundException('User has no city set');
-        const weather = await this.weatherService.getWeather(user.city);
-        await this.telegramService.sendWeatherAlert(user.telegramChatId, user.name, weather);
+            throw new Error('User has no Telegram linked');
+        const weather = await this.weatherService.getWeather(user.city || 'London');
+        await this.telegramService.sendWeatherAlert(user.telegramChatId, weather);
         return { success: true };
-    }
-    async deleteUser(id) {
-        const user = await this.userModel.findByIdAndDelete(id);
-        if (!user)
-            throw new common_1.NotFoundException('User not found');
-        return;
     }
 };
 exports.AdminService = AdminService;

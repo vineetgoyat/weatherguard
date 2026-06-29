@@ -7,16 +7,12 @@ export declare class AdminService {
     private telegramService;
     private weatherService;
     constructor(userModel: Model<User>, telegramService: TelegramService, weatherService: WeatherService);
-    getAllUsers(): import("mongoose").Query<(import("mongoose").FlattenMaps<User> & {
+    getPendingUsers(): Promise<(import("mongoose").Document<unknown, {}, User> & User & {
         _id: import("mongoose").Types.ObjectId;
-    })[], import("mongoose").Document<unknown, {}, User> & User & {
+    })[]>;
+    getAllUsers(): Promise<(import("mongoose").Document<unknown, {}, User> & User & {
         _id: import("mongoose").Types.ObjectId;
-    }, {}, User, "find">;
-    getPendingUsers(): import("mongoose").Query<(import("mongoose").FlattenMaps<User> & {
-        _id: import("mongoose").Types.ObjectId;
-    })[], import("mongoose").Document<unknown, {}, User> & User & {
-        _id: import("mongoose").Types.ObjectId;
-    }, {}, User, "find">;
+    })[]>;
     approveUser(id: string): Promise<import("mongoose").Document<unknown, {}, User> & User & {
         _id: import("mongoose").Types.ObjectId;
     }>;
@@ -26,5 +22,4 @@ export declare class AdminService {
     sendAlertToUser(id: string): Promise<{
         success: boolean;
     }>;
-    deleteUser(id: string): Promise<void>;
 }
