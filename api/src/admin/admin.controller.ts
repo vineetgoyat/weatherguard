@@ -1,53 +1,41 @@
-import { Controller, Get, Patch, Post, Param, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Patch, Post, Delete, Param, UseGuards, HttpCode } from '@nestjs/common';
+import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
-import { UsersService } from '../users/users.service';
-import { UserStatus } from '../users/schemas/user.schema';
-import { TelegramService } from '../telegram/telegram.service';
-import { WeatherService } from '../weather/weather.service';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, AdminGuard)
 export class AdminController {
-  constructor(
-    private usersService: UsersService,
-    private telegramService: TelegramService,
-    private weatherService: WeatherService,
-  ) {}
+  constructor(private readonly adminService: AdminService) {}
 
   @Get('users')
-  async getAllUsers() {
-    return this.usersService.findAll();
+  getAllUsers() {
+    return this.adminService.getAllUsers();
   }
 
   @Get('users/pending')
-  async getPendingUsers() {
-    return this.usersService.findPending();
+  getPendingUsers() {
+    return this.adminService.getPendingUsers();
   }
 
   @Patch('users/:id/approve')
-  async approveUser(@Param('id') id: string) {
-    const user = await this.usersService.updateStatus(id, UserStatus.APPROVED);
-    if (user.telegramChatId) {
-      await this.telegramService.sendApprovalNotification(user.telegramChatId, user.name);
-    }
-    return user;
+  approveUser(@Param('id') id: string) {
+    return this.adminService.approveUser(id);
   }
 
   @Patch('users/:id/reject')
-  async rejectUser(@Param('id') id: string) {
-    return this.usersService.updateStatus(id, UserStatus.REJECTED);
+  rejectUser(@Param('id') id: string) {
+    return this.adminService.rejectUser(id);
   }
 
   @Post('users/:id/send-alert')
-  async sendManualAlert(@Param('id') id: string) {
-    const user = await this.usersService.findById(id);
-    if (!user?.telegramChatId) {
-      return { message: 'User has no Telegram linked' };
-    }
-    const city = user.city || 'London';
-    const weather = await this.weatherService.getWeather(city);
-    await this.telegramService.sendWeatherAlert(user.telegramChatId, weather);
-    return { message: 'Alert sent!' };
+  sendAlert(@Param('id') id: string) {
+    return this.adminService.sendAlertToUser(id);
+  }
+
+  @Delete('users/:id')
+  @HttpCode(204)
+  deleteUser(@Param('id') id: string) {
+    return this.adminService.deleteUser(id);
   }
 }
