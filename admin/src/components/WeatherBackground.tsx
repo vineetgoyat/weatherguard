@@ -55,9 +55,11 @@ export default function WeatherBackground({ timeOfDay }: Props) {
       if (timeOfDay === 'night' || timeOfDay === 'dawn') {
         // Draw stars
         starsRef.current.forEach(s => {
-          const twinkle = 0.4 + 0.6 * Math.sin(frame * 0.03 * s.speed + s.phase);
+          // Range 0.4 -> 1.0, never negative (was 0.4 + 0.6*sin which could go to -0.2)
+          const twinkle = 0.7 + 0.3 * Math.sin(frame * 0.03 * s.speed + s.phase);
+          const radius = Math.max(0.1, s.r * twinkle);
           ctx.beginPath();
-          ctx.arc(s.x, s.y, s.r * twinkle, 0, Math.PI * 2);
+          ctx.arc(s.x, s.y, radius, 0, Math.PI * 2);
           ctx.fillStyle = timeOfDay === 'night'
             ? `rgba(255,255,255,${twinkle * 0.9})`
             : `rgba(255,220,180,${twinkle * 0.6})`;
