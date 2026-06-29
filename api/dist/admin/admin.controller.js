@@ -14,43 +14,30 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminController = void 0;
 const common_1 = require("@nestjs/common");
+const admin_service_1 = require("./admin.service");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const admin_guard_1 = require("../auth/guards/admin.guard");
-const users_service_1 = require("../users/users.service");
-const user_schema_1 = require("../users/schemas/user.schema");
-const telegram_service_1 = require("../telegram/telegram.service");
-const weather_service_1 = require("../weather/weather.service");
 let AdminController = class AdminController {
-    constructor(usersService, telegramService, weatherService) {
-        this.usersService = usersService;
-        this.telegramService = telegramService;
-        this.weatherService = weatherService;
+    constructor(adminService) {
+        this.adminService = adminService;
     }
-    async getAllUsers() {
-        return this.usersService.findAll();
+    getAllUsers() {
+        return this.adminService.getAllUsers();
     }
-    async getPendingUsers() {
-        return this.usersService.findPending();
+    getPendingUsers() {
+        return this.adminService.getPendingUsers();
     }
-    async approveUser(id) {
-        const user = await this.usersService.updateStatus(id, user_schema_1.UserStatus.APPROVED);
-        if (user.telegramChatId) {
-            await this.telegramService.sendApprovalNotification(user.telegramChatId, user.name);
-        }
-        return user;
+    approveUser(id) {
+        return this.adminService.approveUser(id);
     }
-    async rejectUser(id) {
-        return this.usersService.updateStatus(id, user_schema_1.UserStatus.REJECTED);
+    rejectUser(id) {
+        return this.adminService.rejectUser(id);
     }
-    async sendManualAlert(id) {
-        const user = await this.usersService.findById(id);
-        if (!user?.telegramChatId) {
-            return { message: 'User has no Telegram linked' };
-        }
-        const city = user.city || 'London';
-        const weather = await this.weatherService.getWeather(city);
-        await this.telegramService.sendWeatherAlert(user.telegramChatId, weather);
-        return { message: 'Alert sent!' };
+    sendAlert(id) {
+        return this.adminService.sendAlertToUser(id);
+    }
+    deleteUser(id) {
+        return this.adminService.deleteUser(id);
     }
 };
 exports.AdminController = AdminController;
@@ -58,40 +45,46 @@ __decorate([
     (0, common_1.Get)('users'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
+    __metadata("design:returntype", void 0)
 ], AdminController.prototype, "getAllUsers", null);
 __decorate([
     (0, common_1.Get)('users/pending'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
+    __metadata("design:returntype", void 0)
 ], AdminController.prototype, "getPendingUsers", null);
 __decorate([
     (0, common_1.Patch)('users/:id/approve'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
+    __metadata("design:returntype", void 0)
 ], AdminController.prototype, "approveUser", null);
 __decorate([
     (0, common_1.Patch)('users/:id/reject'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
+    __metadata("design:returntype", void 0)
 ], AdminController.prototype, "rejectUser", null);
 __decorate([
     (0, common_1.Post)('users/:id/send-alert'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], AdminController.prototype, "sendManualAlert", null);
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "sendAlert", null);
+__decorate([
+    (0, common_1.Delete)('users/:id'),
+    (0, common_1.HttpCode)(204),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "deleteUser", null);
 exports.AdminController = AdminController = __decorate([
     (0, common_1.Controller)('admin'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
-    __metadata("design:paramtypes", [users_service_1.UsersService,
-        telegram_service_1.TelegramService,
-        weather_service_1.WeatherService])
+    __metadata("design:paramtypes", [admin_service_1.AdminService])
 ], AdminController);
 //# sourceMappingURL=admin.controller.js.map
