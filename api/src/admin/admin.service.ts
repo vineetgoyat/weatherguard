@@ -21,6 +21,10 @@ export class AdminService {
     return this.userModel.find().exec();
   }
 
+  async deleteUser(id: string) {
+    return this.userModel.findByIdAndDelete(id);
+  }
+
   async approveUser(id: string) {
     const user = await this.userModel.findByIdAndUpdate(
       id,

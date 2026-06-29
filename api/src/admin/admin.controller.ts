@@ -32,4 +32,10 @@ export class AdminController {
   sendAlert(@Param('id') id: string) {
     return this.adminService.sendAlertToUser(id);
   }
+
+  @Delete('users/:id')
+  @HttpCode(200)
+  deleteUser(@Param('id') id: string) {
+   return this.adminService.deleteUser(id);
+ }
 }
