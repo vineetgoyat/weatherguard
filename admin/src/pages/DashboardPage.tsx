@@ -137,17 +137,8 @@ export default function DashboardPage() {
                     <div className={`flex items-start gap-3 rounded-xl p-4 ${theme.glass}`}>
                       <StepBadge n={1} theme={theme} />
                       <div className="flex-1">
-                        <p className={`text-sm font-medium ${theme.text}`}>Open Telegram Web or Desktop App</p>
-                        <p className={`text-xs mt-0.5 ${theme.subtext}`}>Use <span className="font-semibold">web.telegram.org</span> or the Telegram desktop app — no phone needed.</p>
-                      </div>
-                    </div>
-
-                    {/* Step 2 */}
-                    <div className={`flex items-start gap-3 rounded-xl p-4 ${theme.glass}`}>
-                      <StepBadge n={2} theme={theme} />
-                      <div className="flex-1">
-                        <p className={`text-sm font-medium ${theme.text}`}>Click your unique link below</p>
-                        <p className={`text-xs mt-0.5 mb-3 ${theme.subtext}`}>This opens a chat with the bot and links your account automatically.</p>
+                        <p className={`text-sm font-medium ${theme.text}`}>Click your unique link — it opens the bot instantly</p>
+                        <p className={`text-xs mt-0.5 mb-3 ${theme.subtext}`}>No need to open Telegram manually. The link takes you straight to the bot.</p>
                         {telegramLink && (
                           <div className="flex items-center gap-2">
                             <code className={`text-xs rounded-lg px-3 py-2 truncate flex-1 min-w-0 ${theme.inputBg}`}>
@@ -176,9 +167,9 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    {/* Step 3 */}
+                    {/* Step 2 */}
                     <div className={`flex items-start gap-3 rounded-xl p-4 ${theme.glass}`}>
-                      <StepBadge n={3} theme={theme} />
+                      <StepBadge n={2} theme={theme} />
                       <div className="flex-1">
                         <p className={`text-sm font-medium ${theme.text}`}>Press START in the bot</p>
                         <p className={`text-xs mt-0.5 ${theme.subtext}`}>The bot will confirm your account is linked ✅</p>
@@ -198,17 +189,8 @@ export default function DashboardPage() {
                     <div className={`flex items-start gap-3 rounded-xl p-4 ${theme.glass}`}>
                       <StepBadge n={1} theme={theme} />
                       <div className="flex-1">
-                        <p className={`text-sm font-medium ${theme.text}`}>Open the Telegram app</p>
-                        <p className={`text-xs mt-0.5 ${theme.subtext}`}>Install it from the App Store or Google Play if you haven't already.</p>
-                      </div>
-                    </div>
-
-                    {/* Step 2 */}
-                    <div className={`flex items-start gap-3 rounded-xl p-4 ${theme.glass}`}>
-                      <StepBadge n={2} theme={theme} />
-                      <div className="flex-1">
-                        <p className={`text-sm font-medium ${theme.text}`}>Tap your unique link to open the bot</p>
-                        <p className={`text-xs mt-0.5 mb-3 ${theme.subtext}`}>Copy the link and open it on your phone, or use the Open button directly.</p>
+                        <p className={`text-sm font-medium ${theme.text}`}>Tap your unique link — it opens the bot instantly</p>
+                        <p className={`text-xs mt-0.5 mb-3 ${theme.subtext}`}>The link launches Telegram and takes you straight to the bot. No manual searching needed.</p>
                         {telegramLink && (
                           <div className="flex items-center gap-2">
                             <code className={`text-xs rounded-lg px-3 py-2 truncate flex-1 min-w-0 ${theme.inputBg}`}>
@@ -227,18 +209,18 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    {/* Step 3 — search fallback */}
+                    {/* Step 2 — search fallback */}
                     <div className={`flex items-start gap-3 rounded-xl p-4 ${theme.glass}`}>
-                      <StepBadge n={3} theme={theme} />
+                      <StepBadge n={2} theme={theme} />
                       <div className="flex-1">
-                        <p className={`text-sm font-medium ${theme.text}`}>Or search <span className="font-bold">@{botUsername}</span> in Telegram</p>
-                        <p className={`text-xs mt-0.5 ${theme.subtext}`}>If the link doesn't open automatically, search for the bot manually and tap START.</p>
+                        <p className={`text-sm font-medium ${theme.text}`}>Can't click the link? Search <span className="font-bold">@{botUsername}</span> in Telegram</p>
+                        <p className={`text-xs mt-0.5 ${theme.subtext}`}>Only needed if the link doesn't auto-open the bot.</p>
                       </div>
                     </div>
 
-                    {/* Step 4 */}
+                    {/* Step 3 */}
                     <div className={`flex items-start gap-3 rounded-xl p-4 ${theme.glass}`}>
-                      <StepBadge n={4} theme={theme} />
+                      <StepBadge n={3} theme={theme} />
                       <div className="flex-1">
                         <p className={`text-sm font-medium ${theme.text}`}>Tap START in the bot</p>
                         <p className={`text-xs mt-0.5 ${theme.subtext}`}>The bot will confirm your account is linked ✅</p>
