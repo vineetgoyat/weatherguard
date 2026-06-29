@@ -150,7 +150,7 @@ export default function AdminPage() {
   const sendAlert = async (id: string) => {
     setActionId(id + '_alert');
     try {
-      await api.post(`/admin/users/${id}/send-alert`);
+      await api.post(`/admin/users/${id}/alert`);
       showToast('✅ Weather alert sent to Telegram!');
     } catch {
       showToast('Failed to send alert', 'error');
