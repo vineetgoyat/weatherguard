@@ -25,6 +25,8 @@ export default function DashboardPage() {
   const [copied, setCopied] = useState(false);
   const [platform, setPlatform] = useState<'desktop' | 'mobile'>('desktop');
 
+  const botUsername = 'weatherguard_vineet_bot';
+
   useEffect(() => {
     api.get('/telegram/link').then(r => setTelegramLink(r.data.link)).catch(() => {});
   }, []);
@@ -51,14 +53,16 @@ export default function DashboardPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const telegramWebLink = telegramLink
-    ? `https://web.telegram.org/k/?start=${telegramLink.split('start=')[1]}#@${botUsername}`
+  const startParam = telegramLink ? telegramLink.split('start=')[1] : null;
+
+  const telegramWebLink = startParam
+    ? `https://web.telegram.org/k/#?tgaddr=${encodeURIComponent(
+        `tg://resolve?domain=${botUsername}&start=${startParam}`
+      )}`
     : '';
 
   const card = `rounded-2xl p-6 mb-4 ${theme.glass}`;
   const cardVariants = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
-
-  const botUsername = 'weatherguard_vineet_bot';
 
   return (
     <Layout>
