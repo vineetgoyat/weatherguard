@@ -51,6 +51,10 @@ export default function DashboardPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const telegramWebLink = telegramLink
+    ? `https://web.telegram.org/k/?start=${telegramLink.split('start=')[1]}#@${botUsername}`
+    : '';
+
   const card = `rounded-2xl p-6 mb-4 ${theme.glass}`;
   const cardVariants = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
 
@@ -138,9 +142,12 @@ export default function DashboardPage() {
                       <StepBadge n={1} theme={theme} />
                       <div className="flex-1">
                         <p className={`text-sm font-medium ${theme.text}`}>Click your unique link — it opens the bot instantly</p>
-                        <p className={`text-xs mt-0.5 mb-3 ${theme.subtext}`}>No need to open Telegram manually. The link takes you straight to the bot.</p>
+                        <p className={`text-xs mt-0.5 mb-3 ${theme.subtext}`}>
+                          Use <span className="font-semibold">Open App</span> if Telegram is installed, or{' '}
+                          <span className="font-semibold">Open Web</span> to use it in your browser — no install needed.
+                        </p>
                         {telegramLink && (
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <code className={`text-xs rounded-lg px-3 py-2 truncate flex-1 min-w-0 ${theme.inputBg}`}>
                               {telegramLink}
                             </code>
@@ -160,7 +167,17 @@ export default function DashboardPage() {
                               whileTap={{ scale: 0.95 }}
                               className={`flex-shrink-0 flex items-center gap-1 px-4 py-2 rounded-lg text-xs font-medium bg-gradient-to-r ${theme.button} text-white`}
                             >
-                              <ExternalLink className="w-3 h-3" /> Open
+                              <ExternalLink className="w-3 h-3" /> Open App
+                            </motion.a>
+                            <motion.a
+                              href={telegramWebLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="flex-shrink-0 flex items-center gap-1 px-4 py-2 rounded-lg text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-400/30 hover:bg-blue-500/30 transition-colors"
+                            >
+                              <ExternalLink className="w-3 h-3" /> Open Web
                             </motion.a>
                           </div>
                         )}
