@@ -1,12 +1,93 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, CheckCircle, XCircle, Send, Clock, RefreshCw, Shield } from 'lucide-react';
+import { Users, CheckCircle, XCircle, Send, Clock, RefreshCw, Shield, Trash2, AlertTriangle } from 'lucide-react';
 import Layout from '../components/layout/Layout';
 import { useTimeOfDay, timeThemes } from '../hooks/useTimeOfDay';
 import api from '../services/api';
 import { User } from '../types';
 
 type TabType = 'all' | 'pending';
+
+function DeleteModal({
+  user,
+  theme,
+  onConfirm,
+  onCancel,
+  loading,
+}: {
+  user: User;
+  theme: any;
+  onConfirm: () => void;
+  onCancel: () => void;
+  loading: boolean;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }}
+      onClick={onCancel}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+        transition={{ type: 'spring', damping: 20 }}
+        className={`w-full max-w-md rounded-3xl p-6 ${theme.glass} border border-red-500/20`}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Icon */}
+        <div className="flex items-center justify-center mb-5">
+          <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+            <AlertTriangle className="w-8 h-8 text-red-400" />
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="text-center mb-6">
+          <h2 className={`text-xl font-bold mb-2 ${theme.text}`}>Delete Account</h2>
+          <p className={`text-sm ${theme.subtext}`}>
+            You are about to permanently delete
+          </p>
+          <div className={`mt-3 p-3 rounded-xl bg-red-500/5 border border-red-500/10`}>
+            <p className={`font-semibold ${theme.text}`}>{user.name}</p>
+            <p className={`text-xs ${theme.subtext}`}>{user.email}</p>
+          </div>
+          <p className={`text-xs mt-3 text-red-400/80`}>
+            This action cannot be undone. All user data will be permanently removed.
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-3">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={onCancel}
+            disabled={loading}
+            className={`flex-1 py-3 rounded-2xl text-sm font-medium transition-colors ${theme.glass} ${theme.subtext} disabled:opacity-50`}
+          >
+            Cancel
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={onConfirm}
+            disabled={loading}
+            className="flex-1 py-3 rounded-2xl text-sm font-semibold bg-red-500/80 hover:bg-red-500 text-white transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {loading
+              ? <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              : <Trash2 className="w-4 h-4" />}
+            {loading ? 'Deleting...' : 'Delete Account'}
+          </motion.button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
 
 export default function AdminPage() {
   const timeOfDay = useTimeOfDay();
@@ -16,7 +97,14 @@ export default function AdminPage() {
   const [tab, setTab] = useState<TabType>('pending');
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
-  const [alertMsg, setAlertMsg] = useState('');
+  const [toastMsg, setToastMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const showToast = (text: string, type: 'success' | 'error' = 'success') => {
+    setToastMsg({ text, type });
+    setTimeout(() => setToastMsg(null), 3500);
+  };
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -24,6 +112,8 @@ export default function AdminPage() {
       const endpoint = tab === 'pending' ? '/admin/users/pending' : '/admin/users';
       const { data } = await api.get(endpoint);
       setUsers(data);
+    } catch {
+      showToast('Failed to fetch users', 'error');
     } finally {
       setLoading(false);
     }
@@ -33,24 +123,55 @@ export default function AdminPage() {
 
   const approve = async (id: string) => {
     setActionId(id);
-    await api.patch(`/admin/users/${id}/approve`);
-    await fetchUsers();
-    setActionId(null);
+    try {
+      await api.patch(`/admin/users/${id}/approve`);
+      await fetchUsers();
+      showToast('✅ User approved — Telegram notification sent');
+    } catch {
+      showToast('Failed to approve user', 'error');
+    } finally {
+      setActionId(null);
+    }
   };
 
   const reject = async (id: string) => {
-    setActionId(id);
-    await api.patch(`/admin/users/${id}/reject`);
-    await fetchUsers();
-    setActionId(null);
+    setActionId(id + '_reject');
+    try {
+      await api.patch(`/admin/users/${id}/reject`);
+      await fetchUsers();
+      showToast('User rejected');
+    } catch {
+      showToast('Failed to reject user', 'error');
+    } finally {
+      setActionId(null);
+    }
   };
 
   const sendAlert = async (id: string) => {
     setActionId(id + '_alert');
-    await api.post(`/admin/users/${id}/send-alert`);
-    setActionId(null);
-    setAlertMsg('✅ Weather alert sent to Telegram!');
-    setTimeout(() => setAlertMsg(''), 3000);
+    try {
+      await api.post(`/admin/users/${id}/send-alert`);
+      showToast('✅ Weather alert sent to Telegram!');
+    } catch {
+      showToast('Failed to send alert', 'error');
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/admin/users/${deleteTarget._id}`);
+      setDeleteTarget(null);
+      await fetchUsers();
+      showToast('Account permanently deleted');
+    } catch {
+      showToast('Failed to delete account', 'error');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const statusBadge: Record<string, string> = {
@@ -61,6 +182,19 @@ export default function AdminPage() {
 
   return (
     <Layout>
+      {/* Delete confirmation modal */}
+      <AnimatePresence>
+        {deleteTarget && (
+          <DeleteModal
+            user={deleteTarget}
+            theme={theme}
+            onConfirm={confirmDelete}
+            onCancel={() => !deleting && setDeleteTarget(null)}
+            loading={deleting}
+          />
+        )}
+      </AnimatePresence>
+
       <div className="max-w-4xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -80,16 +214,20 @@ export default function AdminPage() {
           </motion.button>
         </div>
 
-        {/* Alert toast */}
+        {/* Toast */}
         <AnimatePresence>
-          {alertMsg && (
+          {toastMsg && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="mb-4 p-4 rounded-2xl bg-emerald-400/10 border border-emerald-400/20 text-emerald-400 text-sm font-medium"
+              className={`mb-4 p-4 rounded-2xl text-sm font-medium border ${
+                toastMsg.type === 'success'
+                  ? 'bg-emerald-400/10 border-emerald-400/20 text-emerald-400'
+                  : 'bg-red-400/10 border-red-400/20 text-red-400'
+              }`}
             >
-              {alertMsg}
+              {toastMsg.text}
             </motion.div>
           )}
         </AnimatePresence>
@@ -114,16 +252,16 @@ export default function AdminPage() {
           ))}
         </div>
 
-        {/* Users */}
+        {/* User list */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className={`w-8 h-8 border-2 border-t-transparent rounded-full animate-spin`}
+            <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin"
               style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} />
           </div>
         ) : users.length === 0 ? (
           <div className={`rounded-2xl p-12 text-center ${theme.glass}`}>
             <Users className={`w-12 h-12 mx-auto mb-3 ${theme.subtext}`} />
-            <p className={theme.subtext}>No {tab === 'pending' ? 'pending' : ''} users found</p>
+            <p className={theme.subtext}>No {tab === 'pending' ? 'pending ' : ''}users found</p>
           </div>
         ) : (
           <div className="flex flex-col gap-3">
@@ -138,6 +276,7 @@ export default function AdminPage() {
                   className={`rounded-2xl p-5 ${theme.glass}`}
                 >
                   <div className="flex items-start justify-between gap-4">
+                    {/* User info */}
                     <div className="flex items-center gap-4 min-w-0">
                       {u.avatar
                         ? <img src={u.avatar} className="w-12 h-12 rounded-full ring-2 ring-white/20 flex-shrink-0" alt="" />
@@ -173,7 +312,7 @@ export default function AdminPage() {
                             <CheckCircle className="w-3.5 h-3.5" /> Approve
                           </motion.button>
                           <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                            onClick={() => reject(u._id)} disabled={actionId === u._id}
+                            onClick={() => reject(u._id)} disabled={actionId === u._id + '_reject'}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-medium hover:bg-red-500/30 transition-colors disabled:opacity-50"
                           >
                             <XCircle className="w-3.5 h-3.5" /> Reject
@@ -188,6 +327,13 @@ export default function AdminPage() {
                           <Send className="w-3.5 h-3.5" /> Send Alert
                         </motion.button>
                       )}
+                      {/* Delete — always visible for all users */}
+                      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                        onClick={() => setDeleteTarget(u)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 text-red-400/70 border border-red-500/20 text-xs font-medium hover:bg-red-500/20 hover:text-red-400 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Delete
+                      </motion.button>
                     </div>
                   </div>
                 </motion.div>
