@@ -286,20 +286,20 @@ weatherguard/
 
 ## � Ready to Deploy?
 
-### Deploy the Backend to Railway
+### Deploy the Backend to Render
 
-Railway is perfect for hosting NestJS apps:
+Render is perfect for hosting NestJS apps:
 
 ```bash
-# Install Railway CLI
-npm i -g @railway/cli
+# Install Render CLI
+npm i -g @render/cli
 
 # Go to your API folder and initialize
 cd api
-railway init
-railway up
+render init
+render up
 
-# In the Railway dashboard, add all your env variables from .env
+# In the Render dashboard, add all your env variables from .env
 ```
 
 ### Deploy the Frontend to Vercel
@@ -311,7 +311,7 @@ cd admin
 npx vercel
 
 # When prompted for env variables, set:
-# VITE_API_URL = your-railway-api-url.railway.app
+# VITE_API_URL = your-render-api-url.render.app
 ```
 
 Your app is now live! 🎉
