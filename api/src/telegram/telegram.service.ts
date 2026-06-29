@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
-import * as TelegramBot from 'node-telegram-bot-api';
+import TelegramBot = require('node-telegram-bot-api');
 import { UsersService } from '../users/users.service';
 
 @Injectable()
