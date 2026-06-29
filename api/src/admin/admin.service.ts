@@ -26,14 +26,8 @@ export class AdminService {
   }
 
   async approveUser(id: string) {
-    const user = await this.userModel.findByIdAndUpdate(
-      id,
-      { status: 'approved' },
-      { new: true },
-    );
+    const user = await this.userModel.findByIdAndUpdate(id, { status: 'approved' }, { new: true });
     if (!user) throw new NotFoundException('User not found');
-
-    // FIX 1: Use correct method name
     if (user.telegramChatId) {
       await this.telegramService.sendApprovalNotification(user.telegramChatId, user.name);
     }
@@ -41,15 +35,8 @@ export class AdminService {
   }
 
   async rejectUser(id: string) {
-    const user = await this.userModel.findByIdAndUpdate(
-      id,
-      { status: 'rejected' },
-      { new: true },
-    );
+    const user = await this.userModel.findByIdAndUpdate(id, { status: 'rejected' }, { new: true });
     if (!user) throw new NotFoundException('User not found');
-
-    // FIX 2: Removed telegram block (no sendMessage method exists)
-
     return user;
   }
 
@@ -58,12 +45,8 @@ export class AdminService {
     if (!user) throw new NotFoundException('User not found');
     if (user.status !== 'approved') throw new Error('User is not approved');
     if (!user.telegramChatId) throw new Error('User has no Telegram linked');
-
     const weather = await this.weatherService.getWeather(user.city || 'London');
-
-    // FIX 3: sendWeatherAlert only takes 2 args (chatId, weather)
     await this.telegramService.sendWeatherAlert(user.telegramChatId, weather);
-
     return { success: true };
   }
 }
