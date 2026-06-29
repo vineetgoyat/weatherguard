@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Send, MapPin, MessageSquare, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Send, MapPin, MessageSquare, CheckCircle, Clock, XCircle, Monitor, Smartphone, ExternalLink } from 'lucide-react';
 import Layout from '../components/layout/Layout';
 import { useAuth } from '../context/AuthContext';
 import { useTimeOfDay, timeThemes } from '../hooks/useTimeOfDay';
@@ -23,6 +23,7 @@ export default function DashboardPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [platform, setPlatform] = useState<'desktop' | 'mobile'>('desktop');
 
   useEffect(() => {
     api.get('/telegram/link').then(r => setTelegramLink(r.data.link)).catch(() => {});
@@ -52,6 +53,8 @@ export default function DashboardPage() {
 
   const card = `rounded-2xl p-6 mb-4 ${theme.glass}`;
   const cardVariants = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
+
+  const botUsername = 'weatherguard_vineet_bot';
 
   return (
     <Layout>
@@ -97,40 +100,153 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="mt-4">
-              <p className={`text-sm mb-4 ${theme.subtext}`}>Follow these steps to connect your Telegram account:</p>
-              <div className="flex flex-col gap-3">
-                {[
-                  { title: 'Open Telegram on your phone', desc: 'Make sure you have the Telegram app installed' },
-                  { title: 'Search for @weatherguard_vineet_bot', desc: 'Tap on the bot in search results', highlight: true },
-                  { title: 'Copy your unique link below', desc: 'Send it to your phone via WhatsApp or Notes, then open it', showLink: true },
-                  { title: 'Tap START in the bot', desc: 'The bot will confirm your account is linked ✅' },
-                ].map((step, i) => (
-                  <div key={i} className={`flex items-start gap-3 rounded-xl p-4 ${theme.glass}`}>
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-bold text-white bg-gradient-to-br ${theme.button}`}>
-                      {i + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium ${theme.text}`}>{step.title}</p>
-                      <p className={`text-xs mt-0.5 mb-${step.showLink ? '3' : '0'} ${theme.subtext}`}>{step.desc}</p>
-                      {step.showLink && telegramLink && (
-                        <div className="flex items-center gap-2 mt-2">
-                          <code className={`text-xs rounded-lg px-3 py-2 truncate flex-1 min-w-0 ${theme.inputBg}`}>
-                            {telegramLink}
-                          </code>
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={handleCopy}
-                            className={`flex-shrink-0 px-4 py-2 rounded-lg text-xs font-medium transition-colors ${theme.accentBg} ${theme.accent}`}
-                          >
-                            {copied ? '✅ Copied!' : 'Copy'}
-                          </motion.button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+              <p className={`text-sm mb-4 ${theme.subtext}`}>
+                Link your Telegram to receive automated weather alerts. Choose how you're accessing this:
+              </p>
+
+              {/* Platform Toggle */}
+              <div className={`flex rounded-xl p-1 mb-5 gap-1 ${theme.inputBg}`}>
+                {(['desktop', 'mobile'] as const).map((p) => (
+                  <motion.button
+                    key={p}
+                    onClick={() => setPlatform(p)}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                      platform === p
+                        ? `bg-gradient-to-r ${theme.button} text-white shadow-md`
+                        : `${theme.subtext} hover:opacity-80`
+                    }`}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    {p === 'desktop' ? <Monitor className="w-4 h-4" /> : <Smartphone className="w-4 h-4" />}
+                    {p === 'desktop' ? 'On Desktop / PC' : 'On Mobile'}
+                  </motion.button>
                 ))}
               </div>
+
+              <AnimatePresence mode="wait">
+                {platform === 'desktop' ? (
+                  <motion.div
+                    key="desktop"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex flex-col gap-3"
+                  >
+                    {/* Step 1 */}
+                    <div className={`flex items-start gap-3 rounded-xl p-4 ${theme.glass}`}>
+                      <StepBadge n={1} theme={theme} />
+                      <div className="flex-1">
+                        <p className={`text-sm font-medium ${theme.text}`}>Open Telegram Web or Desktop App</p>
+                        <p className={`text-xs mt-0.5 ${theme.subtext}`}>Use <span className="font-semibold">web.telegram.org</span> or the Telegram desktop app — no phone needed.</p>
+                      </div>
+                    </div>
+
+                    {/* Step 2 */}
+                    <div className={`flex items-start gap-3 rounded-xl p-4 ${theme.glass}`}>
+                      <StepBadge n={2} theme={theme} />
+                      <div className="flex-1">
+                        <p className={`text-sm font-medium ${theme.text}`}>Click your unique link below</p>
+                        <p className={`text-xs mt-0.5 mb-3 ${theme.subtext}`}>This opens a chat with the bot and links your account automatically.</p>
+                        {telegramLink && (
+                          <div className="flex items-center gap-2">
+                            <code className={`text-xs rounded-lg px-3 py-2 truncate flex-1 min-w-0 ${theme.inputBg}`}>
+                              {telegramLink}
+                            </code>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={handleCopy}
+                              className={`flex-shrink-0 px-4 py-2 rounded-lg text-xs font-medium transition-colors ${theme.accentBg} ${theme.accent}`}
+                            >
+                              {copied ? '✅ Copied!' : 'Copy'}
+                            </motion.button>
+                            <motion.a
+                              href={telegramLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className={`flex-shrink-0 flex items-center gap-1 px-4 py-2 rounded-lg text-xs font-medium bg-gradient-to-r ${theme.button} text-white`}
+                            >
+                              <ExternalLink className="w-3 h-3" /> Open
+                            </motion.a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Step 3 */}
+                    <div className={`flex items-start gap-3 rounded-xl p-4 ${theme.glass}`}>
+                      <StepBadge n={3} theme={theme} />
+                      <div className="flex-1">
+                        <p className={`text-sm font-medium ${theme.text}`}>Press START in the bot</p>
+                        <p className={`text-xs mt-0.5 ${theme.subtext}`}>The bot will confirm your account is linked ✅</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="mobile"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex flex-col gap-3"
+                  >
+                    {/* Step 1 */}
+                    <div className={`flex items-start gap-3 rounded-xl p-4 ${theme.glass}`}>
+                      <StepBadge n={1} theme={theme} />
+                      <div className="flex-1">
+                        <p className={`text-sm font-medium ${theme.text}`}>Open the Telegram app</p>
+                        <p className={`text-xs mt-0.5 ${theme.subtext}`}>Install it from the App Store or Google Play if you haven't already.</p>
+                      </div>
+                    </div>
+
+                    {/* Step 2 */}
+                    <div className={`flex items-start gap-3 rounded-xl p-4 ${theme.glass}`}>
+                      <StepBadge n={2} theme={theme} />
+                      <div className="flex-1">
+                        <p className={`text-sm font-medium ${theme.text}`}>Tap your unique link to open the bot</p>
+                        <p className={`text-xs mt-0.5 mb-3 ${theme.subtext}`}>Copy the link and open it on your phone, or use the Open button directly.</p>
+                        {telegramLink && (
+                          <div className="flex items-center gap-2">
+                            <code className={`text-xs rounded-lg px-3 py-2 truncate flex-1 min-w-0 ${theme.inputBg}`}>
+                              {telegramLink}
+                            </code>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={handleCopy}
+                              className={`flex-shrink-0 px-4 py-2 rounded-lg text-xs font-medium transition-colors ${theme.accentBg} ${theme.accent}`}
+                            >
+                              {copied ? '✅' : 'Copy'}
+                            </motion.button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Step 3 — search fallback */}
+                    <div className={`flex items-start gap-3 rounded-xl p-4 ${theme.glass}`}>
+                      <StepBadge n={3} theme={theme} />
+                      <div className="flex-1">
+                        <p className={`text-sm font-medium ${theme.text}`}>Or search <span className="font-bold">@{botUsername}</span> in Telegram</p>
+                        <p className={`text-xs mt-0.5 ${theme.subtext}`}>If the link doesn't open automatically, search for the bot manually and tap START.</p>
+                      </div>
+                    </div>
+
+                    {/* Step 4 */}
+                    <div className={`flex items-start gap-3 rounded-xl p-4 ${theme.glass}`}>
+                      <StepBadge n={4} theme={theme} />
+                      <div className="flex-1">
+                        <p className={`text-sm font-medium ${theme.text}`}>Tap START in the bot</p>
+                        <p className={`text-xs mt-0.5 ${theme.subtext}`}>The bot will confirm your account is linked ✅</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
         </motion.div>
@@ -176,5 +292,13 @@ export default function DashboardPage() {
         </motion.div>
       </motion.div>
     </Layout>
+  );
+}
+
+function StepBadge({ n, theme }: { n: number; theme: any }) {
+  return (
+    <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-bold text-white bg-gradient-to-br ${theme.button}`}>
+      {n}
+    </div>
   );
 }
