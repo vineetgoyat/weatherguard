@@ -14,15 +14,15 @@ export class AlertsService {
     private telegramService: TelegramService,
   ) {}
 
-  // 8 AM daily
-  @Cron('0 8 * * *')
+  // 8 AM daily — Asia/Kolkata
+  @Cron('0 8 * * *', { timeZone: 'Asia/Kolkata' })
   async morningAlert() {
     this.logger.log('⏰ Running morning weather alerts');
     await this.sendAlertsToAll();
   }
 
-  // 6 PM daily
-  @Cron('0 18 * * *')
+  // 6 PM daily — Asia/Kolkata
+  @Cron('0 18 * * *', { timeZone: 'Asia/Kolkata' })
   async eveningAlert() {
     this.logger.log('⏰ Running evening weather alerts');
     await this.sendAlertsToAll();
@@ -31,7 +31,6 @@ export class AlertsService {
   private async sendAlertsToAll() {
     const users = await this.usersService.findApprovedWithTelegram();
     this.logger.log(`Sending alerts to ${users.length} users`);
-
     for (const user of users) {
       try {
         const city = user.city || 'London';
