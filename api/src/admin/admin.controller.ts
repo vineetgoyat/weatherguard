@@ -28,14 +28,14 @@ export class AdminController {
     return this.adminService.rejectUser(id);
   }
 
-  @Post('users/:id/alert')
+  @Post('users/:id/send-alert')
   sendAlert(@Param('id') id: string) {
     return this.adminService.sendAlertToUser(id);
   }
 
   @Delete('users/:id')
-  @HttpCode(200)
+  @HttpCode(204)
   deleteUser(@Param('id') id: string) {
-   return this.adminService.deleteUser(id);
- }
+    return this.adminService.deleteUser(id);
+  }
 }
