@@ -38,14 +38,12 @@ function DeleteModal({
         className={`w-full max-w-md rounded-3xl p-6 ${theme.glass} border border-red-500/20`}
         onClick={e => e.stopPropagation()}
       >
-        {/* Icon */}
         <div className="flex items-center justify-center mb-5">
           <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
             <AlertTriangle className="w-8 h-8 text-red-400" />
           </div>
         </div>
 
-        {/* Content */}
         <div className="text-center mb-6">
           <h2 className={`text-xl font-bold mb-2 ${theme.text}`}>Delete Account</h2>
           <p className={`text-sm ${theme.subtext}`}>
@@ -60,7 +58,6 @@ function DeleteModal({
           </p>
         </div>
 
-        {/* Actions */}
         <div className="flex gap-3">
           <motion.button
             whileHover={{ scale: 1.02 }}
@@ -150,7 +147,7 @@ export default function AdminPage() {
   const sendAlert = async (id: string) => {
     setActionId(id + '_alert');
     try {
-      await api.post(`/admin/users/${id}/alert`);
+      await api.post(`/admin/users/${id}/send-alert`);
       showToast('✅ Weather alert sent to Telegram!');
     } catch {
       showToast('Failed to send alert', 'error');
@@ -182,7 +179,6 @@ export default function AdminPage() {
 
   return (
     <Layout>
-      {/* Delete confirmation modal */}
       <AnimatePresence>
         {deleteTarget && (
           <DeleteModal
@@ -196,7 +192,6 @@ export default function AdminPage() {
       </AnimatePresence>
 
       <div className="max-w-4xl">
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className={`text-3xl font-bold flex items-center gap-3 ${theme.text}`}>
@@ -214,7 +209,6 @@ export default function AdminPage() {
           </motion.button>
         </div>
 
-        {/* Toast */}
         <AnimatePresence>
           {toastMsg && (
             <motion.div
@@ -232,7 +226,6 @@ export default function AdminPage() {
           )}
         </AnimatePresence>
 
-        {/* Tabs */}
         <div className="flex gap-2 mb-6">
           {(['pending', 'all'] as TabType[]).map(t => (
             <motion.button
@@ -252,7 +245,6 @@ export default function AdminPage() {
           ))}
         </div>
 
-        {/* User list */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin"
@@ -276,7 +268,6 @@ export default function AdminPage() {
                   className={`rounded-2xl p-5 ${theme.glass}`}
                 >
                   <div className="flex items-start justify-between gap-4">
-                    {/* User info */}
                     <div className="flex items-center gap-4 min-w-0">
                       {u.avatar
                         ? <img src={u.avatar} className="w-12 h-12 rounded-full ring-2 ring-white/20 flex-shrink-0" alt="" />
@@ -301,7 +292,6 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    {/* Actions */}
                     <div className="flex flex-col gap-2 flex-shrink-0">
                       {u.status === 'pending' && (
                         <>
@@ -327,7 +317,6 @@ export default function AdminPage() {
                           <Send className="w-3.5 h-3.5" /> Send Alert
                         </motion.button>
                       )}
-                      {/* Delete — always visible for all users */}
                       <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                         onClick={() => setDeleteTarget(u)}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 text-red-400/70 border border-red-500/20 text-xs font-medium hover:bg-red-500/20 hover:text-red-400 transition-colors"
