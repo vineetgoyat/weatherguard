@@ -13,20 +13,20 @@ export class AdminService {
     private weatherService: WeatherService,
   ) {}
 
-  async getPendingUsers() {
-    return this.userModel.find({ status: 'pending' }).exec();
+  getAllUsers() {
+    return this.userModel.find().sort({ createdAt: -1 }).lean();
   }
 
-  async getAllUsers() {
-    return this.userModel.find().exec();
-  }
-
-  async deleteUser(id: string) {
-    return this.userModel.findByIdAndDelete(id);
+  getPendingUsers() {
+    return this.userModel.find({ status: 'pending' }).sort({ createdAt: -1 }).lean();
   }
 
   async approveUser(id: string) {
-    const user = await this.userModel.findByIdAndUpdate(id, { status: 'approved' }, { new: true });
+    const user = await this.userModel.findByIdAndUpdate(
+      id,
+      { status: 'approved' },
+      { new: true },
+    );
     if (!user) throw new NotFoundException('User not found');
     if (user.telegramChatId) {
       await this.telegramService.sendApprovalNotification(user.telegramChatId, user.name);
@@ -35,7 +35,11 @@ export class AdminService {
   }
 
   async rejectUser(id: string) {
-    const user = await this.userModel.findByIdAndUpdate(id, { status: 'rejected' }, { new: true });
+    const user = await this.userModel.findByIdAndUpdate(
+      id,
+      { status: 'rejected' },
+      { new: true },
+    );
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
@@ -43,10 +47,17 @@ export class AdminService {
   async sendAlertToUser(id: string) {
     const user = await this.userModel.findById(id);
     if (!user) throw new NotFoundException('User not found');
-    if (user.status !== 'approved') throw new Error('User is not approved');
-    if (!user.telegramChatId) throw new Error('User has no Telegram linked');
-    const weather = await this.weatherService.getWeather(user.city || 'London');
+    if (!user.telegramChatId) throw new NotFoundException('User has no Telegram linked');
+    if (!user.city) throw new NotFoundException('User has no city set');
+
+    const weather = await this.weatherService.getWeather(user.city);
     await this.telegramService.sendWeatherAlert(user.telegramChatId, weather);
     return { success: true };
+  }
+
+  async deleteUser(id: string) {
+    const user = await this.userModel.findByIdAndDelete(id);
+    if (!user) throw new NotFoundException('User not found');
+    return;
   }
 }
