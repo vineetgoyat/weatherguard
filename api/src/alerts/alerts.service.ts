@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { UsersService } from '../users/users.service';
 import { WeatherService } from '../weather/weather.service';
 import { TelegramService } from '../telegram/telegram.service';
@@ -14,14 +14,20 @@ export class AlertsService {
     private telegramService: TelegramService,
   ) {}
 
-  // 8 AM daily — Asia/Kolkata
+  // Keep Render alive — ping every 10 minutes
+  @Cron('*/10 * * * *')
+  keepAlive() {
+    this.logger.log('💓 keep-alive ping');
+  }
+
+  // 8 AM daily IST
   @Cron('0 8 * * *', { timeZone: 'Asia/Kolkata' })
   async morningAlert() {
     this.logger.log('⏰ Running morning weather alerts');
     await this.sendAlertsToAll();
   }
 
-  // 6 PM daily — Asia/Kolkata
+  // 6 PM daily IST
   @Cron('0 18 * * *', { timeZone: 'Asia/Kolkata' })
   async eveningAlert() {
     this.logger.log('⏰ Running evening weather alerts');
